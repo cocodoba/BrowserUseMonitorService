@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -75,9 +76,9 @@ public class MyService extends Service {
         usage_interval_timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                TreeMap<String, UsageStats> myStatsMap = getUsageStatsMap();
+                Map<String, UsageStats> myStatsMap = getUsageStatsMap();
                 if(myStatsMap.isEmpty()!= true){
-                    Log.i(TAG, "run: stats exist:" + myStatsMap.firstKey());
+                    Log.i(TAG, "run: stats exist:" + myStatsMap.toString());
                 }else{
                     Log.i(TAG, "run: stats is empty");
                 }
@@ -117,24 +118,19 @@ public class MyService extends Service {
     /**
      * OSからアプリ使用履歴情報を取得
      *
-     * @return TreeMap<Stringパッケージ名, UsageStats使用履歴>
+     * @return Map<Stringパッケージ名, UsageStats使用履歴>
      */
-    private TreeMap<String, UsageStats> getUsageStatsMap() {
+    private Map<String, UsageStats> getUsageStatsMap() {
 
-        TreeMap<String, UsageStats> myStatsMap = new TreeMap<>();
+        Map<String, UsageStats> myStatsMap;
 
         UsageStatsManager mUsageStatsManager = (UsageStatsManager) getSystemService(USAGE_STATS_SERVICE);
         long time = System.currentTimeMillis();
 
         // We get usage stats for the last interval
-        List<UsageStats> stats = mUsageStatsManager.queryUsageStats
-                (UsageStatsManager.INTERVAL_DAILY, time - 1000 * usageStats_interval_seconds, time);
+        myStatsMap = mUsageStatsManager.queryAndAggregateUsageStats(time - 1000*usageStats_interval_seconds, time);
         // Sort the stats by the last time used
-        if (stats != null) {
-            for (UsageStats usageStats : stats) {
-                myStatsMap.put(usageStats.getPackageName(), usageStats);
-            }
-        }else{Log.i(TAG, "getUsageStatsMap: stats = null");}
+        if (!myStatsMap.isEmpty()) {Log.i(TAG, "getUsageStatsMap: stats != empty");}
 
         return myStatsMap;
     }
