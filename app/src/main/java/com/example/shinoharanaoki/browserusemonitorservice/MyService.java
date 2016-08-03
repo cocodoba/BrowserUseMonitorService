@@ -1,9 +1,12 @@
 package com.example.shinoharanaoki.browserusemonitorservice;
 
+import android.app.ActivityManager;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -23,13 +26,19 @@ public class MyService extends Service {
     private static final String TAG = "MyService";
 
     private int count = 0;//テスト用！！
-    private int count_interval_seconds = 3;
-    private int usageStats_interval_seconds = 15;
+    private int count_interval_seconds = 10;
+    private int usageStats_interval_seconds = 10; //サービスの更新間隔
 
     private Handler handler;
     private Timer count_timer = null;
     private Timer usage_interval_timer;
-    private final String chrome_package_name = "chrome";
+
+    private final String chrome_package_name = "com.android.chrome";
+    private int chrome_usagetime_counter; //Chrome使用時間1分につき＋１カウント
+    private final int chrome_use_limit = 5; //Chrome使用制限時間
+
+    private final String[] alternative_apps_packnames = {"com.google.android.calendar","com.google.android.maps"};//途中で起動するアプリのパッケージネーム
+
 
     public MyService() {
     }
@@ -55,7 +64,7 @@ public class MyService extends Service {
 
         /*
         * TEST サービス駆動確認用 LogとToastを数秒ごとに表示*/
-        count_timer.schedule(new TimerTask() {
+        /*count_timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 Log.d("run: Count Test", "count = " + count);
@@ -67,7 +76,7 @@ public class MyService extends Service {
                 });
                 count++;
             }
-        }, 0, 1000 * count_interval_seconds);
+        }, 0, 1000 * count_interval_seconds);*/
 
         /**
          *
@@ -76,27 +85,33 @@ public class MyService extends Service {
         usage_interval_timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Map<String, UsageStats> myStatsMap = getUsageStatsMap();
-                if(myStatsMap.isEmpty()!= true){
-                    Log.i(TAG, "run: stats exist:" + myStatsMap.toString());
-                }else{
-                    Log.i(TAG, "run: stats is empty");
-                }
-                if (myStatsMap.containsKey(chrome_package_name)) {
-                    final long chrome_used_time = myStatsMap.get(chrome_package_name).getTotalTimeInForeground();
-                    Log.d(TAG, "run: chrome usage found:" + String.valueOf(chrome_used_time) + "milliseconds");
+                String now_foreground_app = getTopActivityPackageName();
+                Log.d(TAG, "run: 現在最前面で使用中のアプリ ＝ " + now_foreground_app);
+
+                if (chrome_package_name.equals(now_foreground_app)){
+                    chrome_usagetime_counter++;
+                    Log.d(TAG, "run: chrome_usage_counter = " + chrome_usagetime_counter);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MyService.this, "Chrome Usage Found!: " + String.valueOf(chrome_used_time/1000)+"秒", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MyService.this, "Chrome Count = " + chrome_usagetime_counter, Toast.LENGTH_SHORT).show();
                         }
                     });
-                } else {
-                    Log.d(TAG, "run: 指定したキーは存在しません:" + myStatsMap.get(chrome_package_name));
+
+                    if(chrome_usagetime_counter >=chrome_use_limit){
+                        PackageManager pm = getPackageManager();
+                        Intent intent = pm.getLaunchIntentForPackage("com.google.android.apps.maps");
+                        try{
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            Log.d(TAG, "run: 対象のアプリが見つかりません");
+                        }
+                        chrome_usagetime_counter = 0;
+
+                    }
                 }
-                Log.d(TAG, "run: monitor usage stats");
             }
-        },0, 1000 * usageStats_interval_seconds);
+        },0, 1000*usageStats_interval_seconds);
 
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;
@@ -130,9 +145,37 @@ public class MyService extends Service {
         // We get usage stats for the last interval
         myStatsMap = mUsageStatsManager.queryAndAggregateUsageStats(time - 1000*usageStats_interval_seconds, time);
         // Sort the stats by the last time used
-        if (!myStatsMap.isEmpty()) {Log.i(TAG, "getUsageStatsMap: stats != empty");}
+        if (!myStatsMap.isEmpty()) {Log.i(TAG, "getUsageStatsMap: UsageStatsにアクセスできました");}
 
         return myStatsMap;
+    }
+
+    private String getTopActivityPackageName() {
+        String packageName = "";
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            List<ActivityManager.RunningAppProcessInfo> list = am.getRunningAppProcesses();
+            packageName = list.get(0).processName;
+        } else {
+            UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+            long endTime = System.currentTimeMillis();
+            long beginTime = endTime - 7 * 24 * 60 * 60 * 1000;
+            List<UsageStats> list = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, beginTime, endTime);
+            if (list != null && list.size() > 0) {
+                SortedMap<Long, UsageStats> map = new TreeMap<>();
+                for (UsageStats usageStats : list) {
+                    map.put(usageStats.getLastTimeUsed(), usageStats);
+                    Log.d(TAG, "package: " + usageStats.getPackageName());
+                }
+                Log.d(TAG, "size: " + map.size());
+                if (!map.isEmpty()) {
+                    packageName = map.get(map.lastKey()).getPackageName();
+                }
+            }
+        }
+        Log.d(TAG, "Current packageName: " + packageName);
+
+        return packageName;
     }
 
 
