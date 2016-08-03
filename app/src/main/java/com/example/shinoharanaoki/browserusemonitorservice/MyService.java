@@ -28,7 +28,7 @@ public class MyService extends Service {
 
     private int count = 0;//テスト用！！
     private int count_interval_seconds = 3;
-    private int usageStats_interval_seconds = 10;
+    private int usageStats_interval_seconds = 10;//TODO Setting
 
     private Handler handler;
     private Timer count_timer = null;
@@ -39,12 +39,14 @@ public class MyService extends Service {
     private final String youtube_package_name = "com.google.android.youtube";
 
     private int over_use_count;
-    private int limit = 15;
+    private int limit = 35; //TODO Setting
 
-    private final String[] alternative_apps = {"com.moneyforward.android.app",
+    private final String[] alternative_apps = {"com.hellochinese",
                                                "com.nowpro.nar03_f",
                                                "me.phrase.phrase",
-                                               };
+                                               "link.mikan.mikanandroid",
+                                               "com.github.client",
+                                               "com.mintflag.hatuonatoz"};//TODO UserSelect
     private int app_select_num;
 
     public MyService() {
