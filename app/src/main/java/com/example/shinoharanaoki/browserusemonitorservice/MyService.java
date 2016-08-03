@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 import android.os.IBinder;
@@ -67,57 +68,44 @@ public class MyService extends Service {
          *     http://d.hatena.ne.jp/sankumee/20120329/1333021847
          * */
         handler = new Handler();
-
-        /*
-        * TEST サービス駆動確認用 LogとToastを数秒ごとに表示*/
-        /*count_timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Log.d("run: Count Test", "count = " + count);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MyService.this, "count = " + count, Toast.LENGTH_SHORT).show();
-                    }
-                });
-                count++;
-            }
-        }, 0, 1000 * count_interval_seconds);*/
+        final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
         /**
          *
-         * 一定秒毎にUsageStatsを取得してChromeの使用履歴があればカウントする
+         * 一定秒毎にUsageStatsを取得してChromeやYoutubeの使用履歴があればカウントする
          * */
         usage_interval_timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                String now_foreground_app = getTopActivityPackageName();
-                Log.d(TAG, "run: 現在最前面のアプリ ＝ "+ now_foreground_app);
-                if(now_foreground_app.equals(chrome_package_name)
-                    ||now_foreground_app.equals(y_news_package_name)
-                    ||now_foreground_app.equals(youtube_package_name)){
-                    over_use_count++;
-                    Log.d(TAG, "run: over_use_count = " + over_use_count);
-                    if(over_use_count >= limit) {
-                        PackageManager pm = getPackageManager();
-                        Intent intent = pm.getLaunchIntentForPackage(alternative_apps[app_select_num]);
-                        if(app_select_num == alternative_apps.length-1){
-                            app_select_num = 0;
-                        }else{
-                            app_select_num++;
+                if (pm.isInteractive()) { //端末スリープ中は履歴の取得を止める
+                    String now_foreground_app = getTopActivityPackageName();
+                    Log.d(TAG, "run: 現在最前面のアプリ ＝ " + now_foreground_app);
+                    if (now_foreground_app.equals(chrome_package_name)
+                            || now_foreground_app.equals(y_news_package_name)
+                            || now_foreground_app.equals(youtube_package_name)) {
+                        over_use_count++;
+                        Log.d(TAG, "run: over_use_count = " + over_use_count);
+                        if (over_use_count >= limit) {
+                            PackageManager pm = getPackageManager();
+                            Intent intent = pm.getLaunchIntentForPackage(alternative_apps[app_select_num]);
+                            if (app_select_num == alternative_apps.length - 1) {
+                                app_select_num = 0;
+                            } else {
+                                app_select_num++;
+                            }
+                            try {
+                                startActivity(intent);
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(MyService.this, "limit" + limit + "です", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } catch (Exception e) {
+                                Log.e(TAG, "run: 指定したアプリは見つかりません", e);
+                            }
+                            over_use_count = 0;
                         }
-                        try {
-                            startActivity(intent);
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(MyService.this, "limit"+limit+"です", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        } catch (Exception e) {
-                            Log.e(TAG, "run: 指定したアプリは見つかりません", e);
-                        }
-                        over_use_count = 0;
                     }
                 }
             }
@@ -156,7 +144,7 @@ public class MyService extends Service {
                 for (UsageStats usageStats : list) {
                     map.put(usageStats.getLastTimeUsed(), usageStats);
                     /*UsageStatsで取得できたアプリ履歴をすべて表示*/
-                    Log.d(TAG, "package: " + usageStats.getPackageName());
+                    //Log.d(TAG, "package: " + usageStats.getPackageName());
                 }
                 /*UsageStatsで取得できたアプリ履歴の件数*/
                 Log.d(TAG, "size: " + map.size());
