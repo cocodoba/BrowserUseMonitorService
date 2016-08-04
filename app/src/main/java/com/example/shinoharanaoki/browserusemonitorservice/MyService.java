@@ -6,11 +6,13 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 import android.os.IBinder;
@@ -25,6 +27,8 @@ import java.util.TreeMap;
 
 public class MyService extends Service {
     private static final String TAG = "MyService";
+
+    private SharedPreferences mPreference;
 
     private int count = 0;//テスト用！！
     private int count_interval_seconds = 3;
@@ -56,6 +60,7 @@ public class MyService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
+        mPreference = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override
