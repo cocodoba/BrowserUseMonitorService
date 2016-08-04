@@ -82,6 +82,7 @@ public class MyService extends Service {
                 if (pm.isInteractive()) { //端末スリープ中は履歴の取得を止める
                     String now_foreground_app = getTopActivityPackageName();
                     Log.d(TAG, "run: 現在最前面のアプリ ＝ " + now_foreground_app);
+                    //TODO 拡張forに
                     if (now_foreground_app.equals(chrome_package_name)
                             || now_foreground_app.equals(y_news_package_name)
                             || now_foreground_app.equals(youtube_package_name)) {
@@ -139,7 +140,7 @@ public class MyService extends Service {
         } else {
             UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
             long endTime = System.currentTimeMillis();
-            long beginTime = endTime - 7 * 24 * 60 * 60 * 1000;
+            long beginTime = endTime - 7 * 24 * 60 * 60 * 1000; //FIXME 短くしても動作する?
             List<UsageStats> list = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, beginTime, endTime);
             if (list != null && list.size() > 0) {
                 SortedMap<Long, UsageStats> map = new TreeMap<>();
