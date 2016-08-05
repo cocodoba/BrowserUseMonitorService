@@ -31,4 +31,17 @@
         android:text="サービス停止"
         android:textSize="30dp"
         android:textAlignment="center" />
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:id="@+id/btnSelectApp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onSelectAppButtonClick"
+        android:text="チェックするアプリを選ぶ"
+        android:textSize="25dp"
+        android:textAlignment="center" />
 </LinearLayout>

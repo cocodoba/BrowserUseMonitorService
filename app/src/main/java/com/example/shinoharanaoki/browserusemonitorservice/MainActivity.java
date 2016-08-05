@@ -56,6 +56,17 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "onStopClick: ");
     }
 
+    /*
+     * "チェックするアプリを選ぶ"ボタン
+     */
+    public void onSelectAppButtonClick(View view) {
+        Intent i = new Intent(this, CheckAppsSelectActivity.class);
+        startActivity(i);
+
+        Log.i(TAG, "onSelectAppButtonClick: new Intent(this, CheckAppsSelectActivity.class);\n" +
+                "        startActivity(i);");
+    }
+
     private void startMyService() {
         Intent intent = null;
         if (!canGetUsageStats()) {
