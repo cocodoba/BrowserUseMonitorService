@@ -18,8 +18,10 @@ import android.widget.Toast;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,10 +40,11 @@ public class MyService extends Service {
     private Timer count_timer = null;
     private Timer usage_interval_timer;
 
-    private final String chrome_package_name = "com.android.chrome";
-    private final String y_news_package_name = "jp.co.yahoo.android.news";
-    private final String youtube_package_name = "com.google.android.youtube";
-    private String google_package_name; //TEST Preference試行のため空欄
+    private String[] usage_checked_package_names = {"com.android.chrome",
+                                                    "jp.co.yahoo.android.news",
+                                                    "com.google.android.youtube",
+                                                    "com.google.android.googlequicksearchbox"};
+                                                    //TODO UserSelect
 
     private int over_use_count;
     private int limit = 35; //TODO Setting
@@ -62,21 +65,20 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
         mPreference = PreferenceManager.getDefaultSharedPreferences(this);
-
-        //TEST
-        google_package_name = mPreference.getString("google"," key 'google' was not found.");
+        int index = 0;//FIXME indexを使わない方法は？
+        Set<String> check_package_name_set = mPreference.getStringSet("CHECK_APPS", new HashSet<String>());
+        for (String package_name : check_package_name_set) {
+            usage_checked_package_names[index] = package_name;
+            Log.d(TAG, "onCreate: usage_checked_package_names = " + "["+index+"]" + package_name);
+            index++;
+        }
         limit = mPreference.getInt("LIMIT", 35);
 
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         Log.i(TAG, "onStartCommand: ");
-
-        //TEST
-        Log.d(TAG, "onStartCommand: Preference.getString " + google_package_name);
-        Log.d(TAG, "onStartCommand: Preference.getInt " + limit);
 
         count_timer = new Timer();
         usage_interval_timer = new Timer();
@@ -98,10 +100,9 @@ public class MyService extends Service {
                 if (pm.isInteractive()) { //端末スリープ中は履歴の取得を止める
                     String now_foreground_app = getTopActivityPackageName();
                     Log.d(TAG, "run: 現在最前面のアプリ ＝ " + now_foreground_app);
-                    //TODO 拡張forに
-                    if (now_foreground_app.equals(chrome_package_name)
-                            || now_foreground_app.equals(y_news_package_name)
-                            || now_foreground_app.equals(youtube_package_name)) {
+                    //DONE 拡張forに
+                    for(String package_name : usage_checked_package_names)
+                    if (now_foreground_app.equals(package_name)) {
                         over_use_count++;
                         Log.d(TAG, "run: over_use_count = " + over_use_count);
                         if (over_use_count >= limit) {
@@ -140,13 +141,26 @@ public class MyService extends Service {
         count_timer.cancel();
         usage_interval_timer.cancel();
 
+        /**配列をにHashSetに順次変換*/
+        Set<String> check_package_name_set  = new HashSet<>();
+        if (usage_checked_package_names.length != 0) {
+            for (String package_name : usage_checked_package_names) {
+                check_package_name_set.add(package_name);
+            }
+        }
+        /**
+         * チェックアプリ・起動アプリリスト、更新間隔、制限時間をPreferenceに保存
+         * */
         SharedPreferences.Editor editor = mPreference.edit();
-        //TEST
-        editor.putString("google", " com.google.android.googlequicksearchbox");
+        editor.putStringSet("CHECK_APPS", check_package_name_set);
         //TEST
         editor.putInt("LIMIT",3);
         editor.commit();  //TODO commit() OR Apply() ?
 
+
+        for (String package_name : check_package_name_set) {
+            Log.d(TAG, "onDestroy: check_package_name_set = " + package_name);
+        }
         Log.d(TAG, "onDestroy: SharedPreferences.editor.commit()");
     }
 
