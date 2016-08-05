@@ -32,8 +32,6 @@ public class MyService extends Service {
 
     private SharedPreferences mPreference;
 
-    private int count = 0;//テスト用！！
-    private int count_interval_seconds = 3;
     private int usageStats_interval_seconds = 10;//TODO Setting
 
     private Handler handler;
@@ -80,9 +78,6 @@ public class MyService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand: ");
 
-        count_timer = new Timer();
-        usage_interval_timer = new Timer();
-
         /**
          * 参考:Handlerクラスの正しい使い方（Androidでスレッド間通信）
          *     http://d.hatena.ne.jp/sankumee/20120329/1333021847
@@ -91,45 +86,54 @@ public class MyService extends Service {
         final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
         /**
-         *
          * 一定秒毎にUsageStatsを取得してChromeやYoutubeの使用履歴があればカウントする
          * */
-        usage_interval_timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (pm.isInteractive()) { //端末スリープ中は履歴の取得を止める
-                    String now_foreground_app = getTopActivityPackageName();
-                    Log.d(TAG, "run: 現在最前面のアプリ ＝ " + now_foreground_app);
-                    //DONE 拡張forに
-                    for(String package_name : usage_checked_package_names)
-                    if (now_foreground_app.equals(package_name)) {
-                        over_use_count++;
-                        Log.d(TAG, "run: over_use_count = " + over_use_count);
-                        if (over_use_count >= limit) {
-                            PackageManager pm = getPackageManager();
-                            Intent intent = pm.getLaunchIntentForPackage(alternative_apps[app_select_num]);
-                            if (app_select_num == alternative_apps.length - 1) {
-                                app_select_num = 0;
-                            } else {
-                                app_select_num++;
+        if (usage_checked_package_names.length != 0) {
+            usage_interval_timer = new Timer();
+            usage_interval_timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if (pm.isInteractive()) { //端末スリープ中は履歴の取得を止める
+                        String now_foreground_app = getTopActivityPackageName();
+                        Log.d(TAG, "run: 現在最前面のアプリ ＝ " + now_foreground_app);
+                        //DONE 拡張forに
+                        for(String package_name : usage_checked_package_names)
+                        if (now_foreground_app.equals(package_name)) {
+                            over_use_count++;
+                            Log.d(TAG, "run: over_use_count = " + over_use_count);
+                            if (over_use_count >= limit) {
+                                PackageManager pm = getPackageManager();
+                                Intent intent = pm.getLaunchIntentForPackage(alternative_apps[app_select_num]);
+                                if (app_select_num == alternative_apps.length - 1) {
+                                    app_select_num = 0;
+                                } else {
+                                    app_select_num++;
+                                }
+                                try {
+                                    startActivity(intent);
+                                    handler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(MyService.this, "limit" + limit + "です", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    Log.e(TAG, "run: 指定したアプリは見つかりません", e);
+                                }
+                                over_use_count = 0;
                             }
-                            try {
-                                startActivity(intent);
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(MyService.this, "limit" + limit + "です", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            } catch (Exception e) {
-                                Log.e(TAG, "run: 指定したアプリは見つかりません", e);
-                            }
-                            over_use_count = 0;
                         }
                     }
                 }
-            }
-        },0, 1000 * usageStats_interval_seconds);
+            },0, 1000 * usageStats_interval_seconds);
+        } else {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(MyService.this, "チェック対象アプリが設定されていません", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         //明示的にサービスの起動、停止が決められる場合の返り値
         return START_STICKY;
@@ -138,7 +142,6 @@ public class MyService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        count_timer.cancel();
         usage_interval_timer.cancel();
 
         /**配列をにHashSetに順次変換*/
