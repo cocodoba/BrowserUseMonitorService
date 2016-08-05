@@ -35,14 +35,9 @@ public class MyService extends Service {
     private int usageStats_interval_seconds = 10;//TODO Setting
 
     private Handler handler;
-    private Timer count_timer = null;
     private Timer usage_interval_timer;
 
-    private String[] usage_checked_package_names = {"com.android.chrome",
-                                                    "jp.co.yahoo.android.news",
-                                                    "com.google.android.youtube",
-                                                    "com.google.android.googlequicksearchbox"};
-                                                    //TODO UserSelect
+    private String[] usage_checked_package_names; //TODO UserSelect
 
     private int over_use_count;
     private int limit = 35; //TODO Setting
@@ -63,12 +58,18 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
         mPreference = PreferenceManager.getDefaultSharedPreferences(this);
-        int index = 0;//FIXME indexを使わない方法は？
         Set<String> check_package_name_set = mPreference.getStringSet("CHECK_APPS", new HashSet<String>());
-        for (String package_name : check_package_name_set) {
-            usage_checked_package_names[index] = package_name;
-            Log.d(TAG, "onCreate: usage_checked_package_names = " + "["+index+"]" + package_name);
-            index++;
+        if (!check_package_name_set.isEmpty()) {
+            usage_checked_package_names = new String[check_package_name_set.size()];
+            /**配列をにHashSetに順次変換*/
+            int index = 0;//FIXME indexを使わない方法は？
+            for (String package_name : check_package_name_set) {
+                usage_checked_package_names[index] = package_name;
+                Log.d(TAG, "onCreate: usage_checked_package_names = " + "["+index+"]" + package_name);
+                index++;
+            }
+        } else {
+            Log.d(TAG, "onCreate: getStringSet(\"CHECK_APPS\") is empty");
         }
         limit = mPreference.getInt("LIMIT", 35);
 
