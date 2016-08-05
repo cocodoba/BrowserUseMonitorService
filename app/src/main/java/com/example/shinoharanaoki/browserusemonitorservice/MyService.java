@@ -41,6 +41,7 @@ public class MyService extends Service {
     private final String chrome_package_name = "com.android.chrome";
     private final String y_news_package_name = "jp.co.yahoo.android.news";
     private final String youtube_package_name = "com.google.android.youtube";
+    private String google_package_name; //TEST Preference試行のため空欄
 
     private int over_use_count;
     private int limit = 35; //TODO Setting
@@ -61,12 +62,22 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
         mPreference = PreferenceManager.getDefaultSharedPreferences(this);
+
+        //TEST
+        google_package_name = mPreference.getString("google"," key 'google' was not found.");
+        limit = mPreference.getInt("LIMIT", 35);
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.i(TAG, "onStartCommand: ");
+
+        //TEST
+        Log.d(TAG, "onStartCommand: Preference.getString " + google_package_name);
+        Log.d(TAG, "onStartCommand: Preference.getInt " + limit);
+
         count_timer = new Timer();
         usage_interval_timer = new Timer();
 
@@ -128,6 +139,15 @@ public class MyService extends Service {
         super.onDestroy();
         count_timer.cancel();
         usage_interval_timer.cancel();
+
+        SharedPreferences.Editor editor = mPreference.edit();
+        //TEST
+        editor.putString("google", " com.google.android.googlequicksearchbox");
+        //TEST
+        editor.putInt("LIMIT",3);
+        editor.commit();  //TODO commit() OR Apply() ?
+
+        Log.d(TAG, "onDestroy: SharedPreferences.editor.commit()");
     }
 
     @Override
