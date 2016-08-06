@@ -30,15 +30,18 @@ import java.util.TreeMap;
 public class MyService extends Service {
     private static final String TAG = "MyService";
 
+    private static int SERVICE = 0;
+    private static final int OFF = 0;
+    private static final int ON = 1;
+
     private SharedPreferences mPreference;
 
-    private int usageStats_interval_seconds = 10;//TODO Setting
 
     private Handler handler;
     private Timer usage_interval_timer;
 
     private String[] usage_checked_package_names; //TODO UserSelect
-
+    private int usageStats_interval_seconds = 10;//TODO Setting
     private int over_use_count;
     private int limit = 38; //TODO Setting
 
@@ -90,7 +93,7 @@ public class MyService extends Service {
         /**
          * 一定秒毎にUsageStatsを取得してChromeやYoutubeの使用履歴があればカウントする
          * */
-        if (usage_checked_package_names.length != 0) { //FIXME 何もアプリを選択しない状態でサービスを開始しようとするとNullが出る
+        if (SERVICE == OFF && usage_checked_package_names.length != 0) { //FIXME 何もアプリを選択しない状態でサービスを開始しようとするとNullが出る
             usage_interval_timer = new Timer();
             usage_interval_timer.schedule(new TimerTask() {
                 @Override
@@ -128,11 +131,12 @@ public class MyService extends Service {
                     }
                 }
             },0, 1000 * usageStats_interval_seconds);
+            SERVICE = ON;
         } else {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MyService.this, "チェック対象アプリが設定されていません", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MyService.this, "チェック対象アプリが設定されていないか、すでにサービス実行中です", Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -144,7 +148,11 @@ public class MyService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        usage_interval_timer.cancel();
+
+        if (SERVICE == ON) {
+            usage_interval_timer.cancel();
+            SERVICE = OFF;
+        }
 
         /**配列をにHashSetに順次変換*/
         Set<String> check_package_name_set  = new HashSet<>();

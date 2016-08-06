@@ -38,6 +38,9 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         setContentView(R.layout.activity_check_apps_select);
         mPreference = PreferenceManager.getDefaultSharedPreferences(this);
 
+        Intent i = new Intent(CheckAppsSelectActivity.this, MyService.class);
+        stopService(i);
+
         final String app_data[][];
 
         /*端末にインストール済のアプリケーション一覧情報を取得*/
@@ -120,8 +123,6 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         Button btn = (Button)findViewById(R.id.btnOk);
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent i = new Intent(CheckAppsSelectActivity.this, MyService.class);
-                stopService(i);
                 // チェックされたアイテムと、配列でのそのアイテムの元々の順番を取得
                 SparseBooleanArray checked = mListView.getCheckedItemPositions();
 
@@ -155,6 +156,8 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                  * */
                 //FIXME 一度Preferenceのデータを消去したほうがいい
                 SharedPreferences.Editor editor = mPreference.edit();
+                editor.remove("CHECK_APPS");
+                editor.commit();
                 editor.putStringSet("CHECK_APPS", check_package_name_set);
                 editor.commit();  //TODO commit() OR Apply() ?
 
