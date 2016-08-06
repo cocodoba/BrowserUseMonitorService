@@ -20,12 +20,19 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
 
     private static final String TAG = "CheckAppsSelectActivity";
 
+    private static final int ARRAYS = 2;
+
+    private static final int ARRAY_APP_NAME = 0;
+    private static final int ARRAY_PACKAGE_NAME = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_apps_select);
 
+        final String app_data[][];
         final String[] app_names;
+        final String[] package_names;
 
         /*端末にインストール済のアプリケーション一覧情報を取得*/
         final PackageManager pm = getPackageManager();
@@ -40,17 +47,21 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         }
 
         /*ApplicationInfoからアプリ名を取得して配列に格納*/
-        app_names = new String[selectableAppInfos.size()];
+        app_data = new String[ARRAYS][];
+        app_data[ARRAY_APP_NAME] = new String[selectableAppInfos.size()];
+        app_data[ARRAY_PACKAGE_NAME] = new String[selectableAppInfos.size()];
         int index = 0;//FIXME indexを使わない方法は？
         for (ApplicationInfo info : selectableAppInfos) {
-            app_names[index] = (String)info.loadLabel(pm);
-            Log.d(TAG, "onCreate: selectable_App_names = " + "["+index+"]" + app_names[index]);
+            app_data[ARRAY_APP_NAME][index] = (String)info.loadLabel(pm);
+            app_data[ARRAY_PACKAGE_NAME][index] = (String)info.loadLabel(pm);
+            Log.i(TAG, "onCreate: selectable_App_names = " + "["+index+"]" + app_data[ARRAY_APP_NAME][index]);
+            Log.i(TAG, "onCreate: selectable_App_package = " + "["+index+"]" + app_data[ARRAY_PACKAGE_NAME][index]);
             index++;
         }
 
         // アイテムをアダプタにセット
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_list_item_multiple_choice, app_names);
+                this, android.R.layout.simple_list_item_multiple_choice, app_data[ARRAY_APP_NAME]);
 
         // リストビューにアイテム (adapter) を追加
         final ListView mListView = (ListView)findViewById(R.id.listView1);
@@ -83,7 +94,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                     //valueAtでチェックされていればtrueが返ってくる
                     if (checked.valueAt(index)) {
                         int key = checked.keyAt(index);//チェックされている配列のキーを取得
-                        sb.append("\""+app_names[key]+"\"" + ",  ");//もともとの配列から値を取得する
+                        sb.append("\""+app_data[ARRAY_APP_NAME][key]+"\"" + ",  ");//もともとの配列から値を取得する
                     }
                 }
                 Toast.makeText( CheckAppsSelectActivity.this, "NOW SELECTING: " + sb.substring(0, sb.length()-1), Toast.LENGTH_LONG ).show();
@@ -115,7 +126,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                 for (int index=0; index<checked.size(); index++) {
                     if (checked.valueAt(index)) {
                         int key_of_list_position = checked.keyAt(index);//リストビューの中での元々の順番を取得
-                        sb.append("\""+app_names[key_of_list_position]+"\""+  " is String from item["+String.valueOf(key_of_list_position)+"]" + ",  ");
+                        sb.append("\""+app_data[ARRAY_APP_NAME][key_of_list_position]+"\""+  " is String from item["+String.valueOf(key_of_list_position)+"]" + ",  ");
                     }
                 }
                 // 通知
