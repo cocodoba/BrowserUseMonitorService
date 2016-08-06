@@ -14,7 +14,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:choiceMode="multipleChoice"
-        />
+        android:headerDividersEnabled="false"
+        android:layout_marginTop="45dp" />
     <Button
         android:id="@+id/btnOk"
         android:layout_width="match_parent"
