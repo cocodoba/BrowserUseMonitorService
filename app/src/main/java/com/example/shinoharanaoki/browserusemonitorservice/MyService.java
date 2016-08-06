@@ -40,7 +40,7 @@ public class MyService extends Service {
     private String[] usage_checked_package_names; //TODO UserSelect
 
     private int over_use_count;
-    private int limit = 35; //TODO Setting
+    private int limit = 38; //TODO Setting
 
     private final String[] alternative_apps = {"com.hellochinese",
                                                "com.nowpro.nar03_f",
@@ -70,8 +70,9 @@ public class MyService extends Service {
             }
         } else {
             Log.d(TAG, "onCreate: getStringSet(\"CHECK_APPS\") is empty");
+            usage_checked_package_names = new String[0]; //これが無いとNullPointer
         }
-        limit = mPreference.getInt("LIMIT", 35);
+        limit = mPreference.getInt("LIMIT", 38);
 
     }
 
@@ -89,7 +90,7 @@ public class MyService extends Service {
         /**
          * 一定秒毎にUsageStatsを取得してChromeやYoutubeの使用履歴があればカウントする
          * */
-        if (usage_checked_package_names.length != 0) {
+        if (usage_checked_package_names.length != 0) { //FIXME 何もアプリを選択しない状態でサービスを開始しようとするとNullが出る
             usage_interval_timer = new Timer();
             usage_interval_timer.schedule(new TimerTask() {
                 @Override
@@ -158,7 +159,7 @@ public class MyService extends Service {
         SharedPreferences.Editor editor = mPreference.edit();
         editor.putStringSet("CHECK_APPS", check_package_name_set);
         //TEST
-        editor.putInt("LIMIT",3);
+        editor.putInt("LIMIT",35);
         editor.commit();  //TODO commit() OR Apply() ?
 
 

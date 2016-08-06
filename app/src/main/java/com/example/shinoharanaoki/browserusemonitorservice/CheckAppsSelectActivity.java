@@ -1,7 +1,10 @@
 package com.example.shinoharanaoki.browserusemonitorservice;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,9 +17,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CheckAppsSelectActivity extends AppCompatActivity {
+
+    private SharedPreferences mPreference;
 
     private static final String TAG = "CheckAppsSelectActivity";
 
@@ -29,6 +36,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_apps_select);
+        mPreference = PreferenceManager.getDefaultSharedPreferences(this);
 
         final String app_data[][];
 
@@ -58,6 +66,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         }
 
         // アイテムをアダプタにセット
+        //TODO 既に設定済みのアプリをチェック状態にする
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_list_item_multiple_choice, app_data[ARRAY_APP_NAME]);
 
@@ -96,8 +105,9 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                         Log.d(TAG, "onItemClick: app_data[ARRAY_PACKAGE_NAME] = " + app_data[ARRAY_PACKAGE_NAME][key]);
                     }
                 }
-                Toast.makeText( CheckAppsSelectActivity.this, "NOW SELECTING: " + sb.substring(0, sb.length()-1), Toast.LENGTH_LONG ).show();
-
+                if (sb.length()>0) {
+                    Toast.makeText( CheckAppsSelectActivity.this, "NOW SELECTING: " + sb.substring(0, sb.length()-1), Toast.LENGTH_LONG ).show();
+                }
                 //TEST 一度でも選択されたアイテムの数を出力
                 //★配列の個数分ループ
                 for( int index = 0; index < checked.size(); index++ ) {
@@ -110,6 +120,8 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         Button btn = (Button)findViewById(R.id.btnOk);
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                Intent i = new Intent(CheckAppsSelectActivity.this, MyService.class);
+                stopService(i);
                 // チェックされたアイテムと、配列でのそのアイテムの元々の順番を取得
                 SparseBooleanArray checked = mListView.getCheckedItemPositions();
 
@@ -121,16 +133,32 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                 なので、現在チェックされているかどうかを valutAt の戻り値
                 で判定する必要がある！！！*/
                 StringBuilder sb = new StringBuilder();
+                Set<String> check_package_name_set  = new HashSet<>();
 
                 for (int index=0; index<checked.size(); index++) {
                     if (checked.valueAt(index)) {
                         int key_of_list_position = checked.keyAt(index);//リストビューの中での元々の順番を取得
+                        /**チェックしたアプリのパッケージ名をHashSetに保存する*/
+                        String package_name = app_data[ARRAY_PACKAGE_NAME][key_of_list_position];
+                        check_package_name_set.add(package_name);
+                        Log.i(TAG, "onClick: check_package_name_set.add ..." + package_name);
+
                         sb.append("\""+app_data[ARRAY_APP_NAME][key_of_list_position]+"\""+  " is String from item["+String.valueOf(key_of_list_position)+"]" + ",  ");
                     }
                 }
                 // 通知
                 Toast.makeText(CheckAppsSelectActivity.this,
                         sb.toString(), Toast.LENGTH_LONG).show();
+
+                /**
+                 * チェックアプリをPreferenceに保存
+                 * */
+                //FIXME 一度Preferenceのデータを消去したほうがいい
+                SharedPreferences.Editor editor = mPreference.edit();
+                editor.putStringSet("CHECK_APPS", check_package_name_set);
+                editor.commit();  //TODO commit() OR Apply() ?
+
+                Toast.makeText(CheckAppsSelectActivity.this, "チェックするアプリを保存しました", Toast.LENGTH_SHORT).show();
             }
         });
     }
