@@ -31,8 +31,6 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         setContentView(R.layout.activity_check_apps_select);
 
         final String app_data[][];
-        final String[] app_names;
-        final String[] package_names;
 
         /*端末にインストール済のアプリケーション一覧情報を取得*/
         final PackageManager pm = getPackageManager();
@@ -53,7 +51,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         int index = 0;//FIXME indexを使わない方法は？
         for (ApplicationInfo info : selectableAppInfos) {
             app_data[ARRAY_APP_NAME][index] = (String)info.loadLabel(pm);
-            app_data[ARRAY_PACKAGE_NAME][index] = (String)info.loadLabel(pm);
+            app_data[ARRAY_PACKAGE_NAME][index] = info.packageName;
             Log.i(TAG, "onCreate: selectable_App_names = " + "["+index+"]" + app_data[ARRAY_APP_NAME][index]);
             Log.i(TAG, "onCreate: selectable_App_package = " + "["+index+"]" + app_data[ARRAY_PACKAGE_NAME][index]);
             index++;
@@ -95,6 +93,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                     if (checked.valueAt(index)) {
                         int key = checked.keyAt(index);//チェックされている配列のキーを取得
                         sb.append("\""+app_data[ARRAY_APP_NAME][key]+"\"" + ",  ");//もともとの配列から値を取得する
+                        Log.d(TAG, "onItemClick: app_data[ARRAY_PACKAGE_NAME] = " + app_data[ARRAY_PACKAGE_NAME][key]);
                     }
                 }
                 Toast.makeText( CheckAppsSelectActivity.this, "NOW SELECTING: " + sb.substring(0, sb.length()-1), Toast.LENGTH_LONG ).show();
