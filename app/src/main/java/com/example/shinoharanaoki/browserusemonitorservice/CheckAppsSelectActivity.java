@@ -24,10 +24,17 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_apps_select);
 
-        final String[] item; //FIXME name
+        //final String[] item; //FIXME name
+        final String[] item = new String [] {
+                "listView item 1",
+                "listView item 2",
+                "listView item 3",
+                "listView item 4",
+                "listView item 5"
+        };
 
         /*端末にインストール済のアプリケーション一覧情報を取得*/
-        final PackageManager pm = getPackageManager();
+        /*final PackageManager pm = getPackageManager();
         List<ApplicationInfo> installedAppInfos = pm.getInstalledApplications(0);
         int i = 1;
         List<ApplicationInfo> selectableAppInfos = new ArrayList<>();
@@ -37,14 +44,14 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                 selectableAppInfos.add(info);
                 i++;
             }
-        }
-        item = new String[i];
+        }*/
+        /*item = new String[i];
         int index = 0;//FIXME indexを使わない方法は？
         for (ApplicationInfo info : selectableAppInfos) {
             item[index] = (String)info.loadLabel(pm);
             Log.d(TAG, "onCreate: selectable_App_names = " + "["+index+"]" + item[index]);
             index++;
-        }
+        }*/
 
         // 追加するアイテムを生成する
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -62,8 +69,6 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                 ListView listView1 = (ListView)findViewById(R.id.listView1);
                 SparseBooleanArray checked = listView1.getCheckedItemPositions();
 
-                int position = listView1.getPositionForView(v);
-
                 /*チェックされたアイテムの文字列を生成
                 checked には、「チェックされているアイテム」ではなく、
                 「一度でもチェックされたアイテム」が入ってくる。
@@ -72,14 +77,13 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                 StringBuilder sb = new StringBuilder();
                 for (int i=0; i<checked.size(); i++) {
                     if (checked.valueAt(i)) {
-                        sb.append(item[i] + "["+String.valueOf(i)+"]" + ",");
+                        /**i+1としないとなぜか1つ少ないポジションのアイテムが参照される*/
+                        sb.append(item[i+1] + "["+String.valueOf(i+1)+"]" + ",");
                     }
                 }
                 // 通知
                 Toast.makeText(CheckAppsSelectActivity.this,
-                        sb.toString(), Toast.LENGTH_SHORT).show();
-                Toast.makeText(CheckAppsSelectActivity.this,
-                        String.valueOf(position), Toast.LENGTH_SHORT).show();
+                        sb.toString(), Toast.LENGTH_LONG).show();
             }
         });
     }
