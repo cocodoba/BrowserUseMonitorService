@@ -25,7 +25,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_apps_select);
 
-        final String[] app_names; //FIXME name
+        final String[] app_names;
 
         /*端末にインストール済のアプリケーション一覧情報を取得*/
         final PackageManager pm = getPackageManager();
@@ -38,9 +38,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                 selectableAppInfos.add(info);
             }
         }
-        /**
-         * 一番下までスクロールするとアクティビティがフリーズする不具合を修正
-         * */
+
         /*ApplicationInfoからアプリ名を取得して配列に格納*/
         app_names = new String[selectableAppInfos.size()];
         int index = 0;//FIXME indexを使わない方法は？
@@ -55,8 +53,8 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                 this, android.R.layout.simple_list_item_multiple_choice, app_names);
 
         // リストビューにアイテム (adapter) を追加
-        final ListView listView1 = (ListView)findViewById(R.id.listView1); //FIXME name
-        listView1.setAdapter(adapter);
+        final ListView mListView = (ListView)findViewById(R.id.listView1);
+        mListView.setAdapter(adapter);
 
         /**「android ListView 複数リスト 選択した値を取得する”」
          *   http://k-1-ne-jp.blogspot.jp/2013/09/android-listview.html*/
@@ -65,7 +63,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
          * リストの項目をクリックしたときの処理
          * @params position タッチした場所（一番上は0）
          */
-        listView1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id){
 
@@ -77,7 +75,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
                 名前的に現在チェックしている項目の配列を取得してくれそうだけど、そうではない事に注意
 
                 つまり現在何も選択されていないのに、結果的に全てのアイテムがcheckedに入ったままな状況もありうる*/
-                SparseBooleanArray checked = listView1.getCheckedItemPositions();
+                SparseBooleanArray checked = mListView.getCheckedItemPositions();
                 StringBuilder sb = new StringBuilder();
 
                 //★配列の個数分ループ
@@ -103,7 +101,7 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // チェックされたアイテムと、配列でのそのアイテムの元々の順番を取得
-                SparseBooleanArray checked = listView1.getCheckedItemPositions();
+                SparseBooleanArray checked = mListView.getCheckedItemPositions();
 
                 Log.i(TAG, "onClick: checked.size() = " + checked.size());
 
