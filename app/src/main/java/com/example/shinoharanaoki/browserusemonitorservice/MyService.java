@@ -40,7 +40,7 @@ public class MyService extends Service {
     private Handler handler;
     private Timer usage_interval_timer;
 
-    private String[] usage_checked_package_names; //TODO UserSelect
+    private String[] usage_checked_package_names;
     private int usageStats_interval_seconds = 10;//TODO Setting
     private int over_use_count;
     private int limit = 38; //TODO Setting
@@ -63,7 +63,7 @@ public class MyService extends Service {
         mPreference = PreferenceManager.getDefaultSharedPreferences(this);
         Set<String> check_package_name_set = mPreference.getStringSet("CHECK_APPS", new HashSet<String>());
         if (!check_package_name_set.isEmpty()) {
-            usage_checked_package_names = new String[check_package_name_set.size()];
+            usage_checked_package_names = new String[check_package_name_set.size()  +1 ];//FIXME この+1は、YahooNewsなどが設定リストに反映されないのでその応急処置
             /**配列をにHashSetに順次変換*/
             int index = 0;//FIXME indexを使わない方法は？
             for (String package_name : check_package_name_set) {
@@ -71,6 +71,9 @@ public class MyService extends Service {
                 Log.d(TAG, "onCreate: usage_checked_package_names = " + "["+index+"]" + package_name);
                 index++;
             }
+            //FIXME YahooNewsなどが設定リストに反映されないのでその応急処置
+            usage_checked_package_names[index] ="jp.co.yahoo.android.news";
+            Log.d(TAG, "onCreate: usage_checked_package_names = " + "["+(index)+"]" + usage_checked_package_names[index]);
         } else {
             Log.d(TAG, "onCreate: getStringSet(\"CHECK_APPS\") is empty");
             usage_checked_package_names = new String[0]; //これが無いとNullPointer
@@ -93,7 +96,7 @@ public class MyService extends Service {
         /**
          * 一定秒毎にUsageStatsを取得してChromeやYoutubeの使用履歴があればカウントする
          * */
-        if (SERVICE == OFF && usage_checked_package_names.length != 0) { //FIXME 何もアプリを選択しない状態でサービスを開始しようとするとNullが出る
+        if (SERVICE == OFF && usage_checked_package_names.length != 0) {
             usage_interval_timer = new Timer();
             usage_interval_timer.schedule(new TimerTask() {
                 @Override
