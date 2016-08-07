@@ -38,7 +38,10 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".CheckAppsSelectActivity"></activity>
+        <activity android:name=".CheckAppsSelectActivity" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>

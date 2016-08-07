@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -88,5 +91,34 @@ public class MainActivity extends AppCompatActivity {
         int uid = android.os.Process.myUid();
         int mode = aom.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, uid, getPackageName());
         return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    /**
+     * 「ActionBarにメニューの「・・・」を常時表示してサブメニューにアイコンを表示する」
+     * http://qiita.com/takke/items/26993bcabd6866244fba*/
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        final MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_reload:
+                Log.i(TAG, "onOptionsItemSelected: menu_reload");
+                //TODO メイン画面を更新する処理
+                return true;
+            case R.id.menu_settings:
+                Log.i(TAG, "onOptionsItemSelected: menu_settings");
+                Intent i = new Intent(this, SettingsActivity.class);
+                startActivity(i);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
