@@ -45,12 +45,13 @@ public class MyService extends Service {
     private int over_use_count;
     private int limit = 38; //TODO Setting
 
-    private final String[] alternative_apps = {"com.hellochinese",
+    private String[] alternative_apps;
+                                            /*= {"com.hellochinese",
                                                "com.nowpro.nar03_f",
                                                "me.phrase.phrase",
                                                "link.mikan.mikanandroid",
                                                "com.github.client",
-                                               "com.mintflag.hatuonatoz"};//TODO UserSelect
+                                               "com.mintflag.hatuonatoz"};//TODO UserSelect*/
     private int app_select_num;
 
     public MyService() {
@@ -61,10 +62,14 @@ public class MyService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate: ");
         mPreference = PreferenceManager.getDefaultSharedPreferences(this);
+
+        /**
+         * チェックするアプリの配列を用意する
+         * */
         Set<String> check_package_name_set = mPreference.getStringSet("CHECK_APPS", new HashSet<String>());
         if (!check_package_name_set.isEmpty()) {
             usage_checked_package_names = new String[check_package_name_set.size()  +1 ];//FIXME この+1は、YahooNewsなどが設定リストに反映されないのでその応急処置
-            /**配列をにHashSetに順次変換*/
+            /**HashSetを配列に順次変換*/
             int index = 0;//FIXME indexを使わない方法は？
             for (String package_name : check_package_name_set) {
                 usage_checked_package_names[index] = package_name;
@@ -77,6 +82,24 @@ public class MyService extends Service {
         } else {
             Log.d(TAG, "onCreate: getStringSet(\"CHECK_APPS\") is empty");
             usage_checked_package_names = new String[0]; //これが無いとNullPointer
+        }
+
+        /**
+         * 起動するアプリの配列を用意する
+         * */
+        Set<String> break_package_name_set = mPreference.getStringSet("BREAK_APPS", new HashSet<String>());
+        if (!break_package_name_set.isEmpty()) {
+            alternative_apps = new String[break_package_name_set.size()];
+            /**HashSetを配列に順次変換*/
+            int index = 0;//FIXME indexを使わない方法は？
+            for (String package_name : break_package_name_set) {
+                alternative_apps[index] = package_name;
+                Log.d(TAG, "onCreate: alternative_apps = " + "["+index+"]" + package_name);
+                index++;
+            }
+        } else {
+            Log.d(TAG, "onCreate: getStringSet(\"BREAK_APPS\") is empty");
+            alternative_apps = new String[0]; //これが無いとNullPointer
         }
         limit = mPreference.getInt("LIMIT", 38);
 
@@ -157,6 +180,7 @@ public class MyService extends Service {
             SERVICE = OFF;
         }
 
+        //FIXME 要らない？ ＜ーーここから
         /**配列をにHashSetに順次変換*/
         Set<String> check_package_name_set  = new HashSet<>();
         if (usage_checked_package_names.length != 0) {
@@ -178,6 +202,7 @@ public class MyService extends Service {
             Log.d(TAG, "onDestroy: check_package_name_set = " + package_name);
         }
         Log.d(TAG, "onDestroy: SharedPreferences.editor.commit()");
+        //FIXME ここまでーー＞ 要らない？
     }
 
     @Override

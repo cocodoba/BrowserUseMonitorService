@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp">
 
     <Space
         android:layout_width="match_parent"
@@ -37,11 +39,20 @@
         android:layout_gravity="center_horizontal" />
 
     <Button
-        android:id="@+id/btnSelectApp"
+        android:id="@+id/btnSelectCheckApp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="onSelectAppButtonClick"
+        android:onClick="onSelectCheckAppButtonClick"
         android:text="チェックするアプリを選ぶ"
+        android:textSize="25dp"
+        android:textAlignment="center" />
+
+    <Button
+        android:id="@+id/btnSelectBreakApp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onSelectBreakAppButtonClick"
+        android:text="起動するアプリを選ぶ"
         android:textSize="25dp"
         android:textAlignment="center" />
 </LinearLayout>

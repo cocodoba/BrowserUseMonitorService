@@ -62,11 +62,22 @@ public class MainActivity extends AppCompatActivity {
     /*
      * "チェックするアプリを選ぶ"ボタン
      */
-    public void onSelectAppButtonClick(View view) {
+    public void onSelectCheckAppButtonClick(View view) {
         Intent i = new Intent(this, CheckAppsSelectActivity.class);
         startActivity(i);
 
-        Log.i(TAG, "onSelectAppButtonClick: new Intent(this, CheckAppsSelectActivity.class);\n" +
+        Log.i(TAG, "onSelectCheckAppButtonClick: new Intent(this, CheckAppsSelectActivity.class);\n" +
+                "        startActivity(i);");
+    }
+
+    /*
+     * "チェックするアプリを選ぶ"ボタン
+     */
+    public void onSelectBreakAppButtonClick(View view) {
+        Intent i = new Intent(this, BreakAppsSelectActivity.class);
+        startActivity(i);
+
+        Log.i(TAG, "onSelectBreakAppButtonClick: new Intent(this, BreakAppsSelectActivity.class);\n" +
                 "        startActivity(i);");
     }
 
