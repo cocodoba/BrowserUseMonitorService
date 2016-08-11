@@ -77,6 +77,19 @@ public class BreakAppsSelectActivity extends AppCompatActivity {
         final ListView mListView = (ListView)findViewById(R.id.listView1);
         mListView.setAdapter(adapter);
 
+        /**
+         * 既に設定保存したアプリはチェックボックスをONにした状態にする
+         */
+        Set<String> check_package_name_set = mPreference.getStringSet("BREAK_APPS", new HashSet<String>());
+        /*コレクション同士の照合*/
+        for(String package_name : check_package_name_set) {
+            for (index = 0; index<app_data[ARRAY_PACKAGE_NAME].length;index++) {
+                if(app_data[ARRAY_PACKAGE_NAME][index].equals(package_name)) {
+                    mListView.setItemChecked(index, true);
+                }
+            }
+        }
+
         /**「android ListView 複数リスト 選択した値を取得する”」
          *   http://k-1-ne-jp.blogspot.jp/2013/09/android-listview.html*/
 
@@ -139,7 +152,7 @@ public class BreakAppsSelectActivity extends AppCompatActivity {
                 for (int index=0; index<checked.size(); index++) {
                     if (checked.valueAt(index)) {
                         int key_of_list_position = checked.keyAt(index);//リストビューの中での元々の順番を取得
-                        /**チェックしたアプリのパッケージ名をHashSetに保存する*/
+                        /**チェックしたアプリのパッケージ名をPreferenceへの保存のためHashSetに変換する*/
                         String package_name = app_data[ARRAY_PACKAGE_NAME][key_of_list_position];
                         check_package_name_set.add(package_name);
                         Log.i(TAG, "onClick: check_package_name_set.add ..." + package_name);

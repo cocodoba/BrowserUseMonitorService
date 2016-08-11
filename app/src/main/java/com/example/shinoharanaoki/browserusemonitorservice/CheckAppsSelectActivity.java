@@ -43,6 +43,10 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
 
         final String app_data[][];
 
+        /**
+         * PackageManagerからインストール済みのアプリ情報を全部取得して、
+         * アプリ名等をリストに表示する
+         **/
         /*端末にインストール済のアプリケーション一覧情報を取得*/
         final PackageManager pm = getPackageManager();
         List<ApplicationInfo> installedAppInfos = pm.getInstalledApplications(0);
@@ -77,9 +81,21 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         final ListView mListView = (ListView)findViewById(R.id.listView1);
         mListView.setAdapter(adapter);
 
+        /**
+         * 既に設定保存したアプリはチェックボックスをONにした状態にする
+         */
+        Set<String> check_package_name_set = mPreference.getStringSet("CHECK_APPS", new HashSet<String>());
+        /*コレクション同士の照合*/
+        for(String package_name : check_package_name_set) {
+            for (index = 0; index<app_data[ARRAY_PACKAGE_NAME].length;index++) {
+                if(app_data[ARRAY_PACKAGE_NAME][index].equals(package_name)) {
+                    mListView.setItemChecked(index, true);
+                }
+            }
+        }
+
         /**「android ListView 複数リスト 選択した値を取得する”」
          *   http://k-1-ne-jp.blogspot.jp/2013/09/android-listview.html*/
-
         /**
          * リストの項目をクリックしたときの処理
          * @params position タッチした場所（一番上は0）

@@ -44,6 +44,7 @@ public class MyService extends Service {
     private int usageStats_interval_seconds = 10;//TODO Setting
     private int over_use_count;
     private int limit = 38; //TODO Setting
+    private int last_break_app;
 
     private String[] alternative_apps;
                                             /*= {"com.hellochinese",
@@ -136,7 +137,7 @@ public class MyService extends Service {
                                 PackageManager pm = getPackageManager();
                                 Intent intent = pm.getLaunchIntentForPackage(alternative_apps[app_select_num]);
                                 if (app_select_num == alternative_apps.length - 1) {
-                                    app_select_num = 0;
+                                    app_select_num = 0; //TODO 起動するアプリの順番の番号→サービス終了時に保存
                                 } else {
                                     app_select_num++;
                                 }
