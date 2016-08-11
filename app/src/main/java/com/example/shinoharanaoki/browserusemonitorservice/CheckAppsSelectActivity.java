@@ -73,7 +73,6 @@ public class CheckAppsSelectActivity extends AppCompatActivity {
         }
 
         // アイテムをアダプタにセット
-        //TODO 既に設定済みのアプリをチェック状態にする
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_list_item_multiple_choice, app_data[ARRAY_APP_NAME]);
 
