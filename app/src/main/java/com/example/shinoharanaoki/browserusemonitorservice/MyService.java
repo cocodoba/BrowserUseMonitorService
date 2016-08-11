@@ -69,7 +69,7 @@ public class MyService extends Service {
          * */
         Set<String> check_package_name_set = mPreference.getStringSet("CHECK_APPS", new HashSet<String>());
         if (!check_package_name_set.isEmpty()) {
-            usage_checked_package_names = new String[check_package_name_set.size()  +1 ];//FIXME この+1は、YahooNewsなどが設定リストに反映されないのでその応急処置
+            usage_checked_package_names = new String[check_package_name_set.size()];
             /**HashSetを配列に順次変換*/
             int index = 0;//FIXME indexを使わない方法は？
             for (String package_name : check_package_name_set) {
@@ -77,9 +77,6 @@ public class MyService extends Service {
                 Log.d(TAG, "onCreate: usage_checked_package_names = " + "["+index+"]" + package_name);
                 index++;
             }
-            //FIXME YahooNewsなどが設定リストに反映されないのでその応急処置
-            usage_checked_package_names[index] ="jp.co.yahoo.android.news";
-            Log.d(TAG, "onCreate: usage_checked_package_names = " + "["+(index)+"]" + usage_checked_package_names[index]);
         } else {
             Log.d(TAG, "onCreate: getStringSet(\"CHECK_APPS\") is empty");
             usage_checked_package_names = new String[0]; //これが無いとNullPointer

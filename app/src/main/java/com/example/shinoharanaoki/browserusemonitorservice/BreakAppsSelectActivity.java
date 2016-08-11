@@ -159,9 +159,7 @@ public class BreakAppsSelectActivity extends AppCompatActivity {
                         sb.append("\""+app_data[ARRAY_APP_NAME][key_of_list_position]+"\""+  " is String from item["+String.valueOf(key_of_list_position)+"]" + ",  ");
                     }
                 }
-                // 通知
-                Toast.makeText(BreakAppsSelectActivity.this,
-                        sb.toString(), Toast.LENGTH_LONG).show();
+                Log.i(TAG, "onClick: " + sb.toString());
 
                 /**
                  * チェックアプリをPreferenceに保存
