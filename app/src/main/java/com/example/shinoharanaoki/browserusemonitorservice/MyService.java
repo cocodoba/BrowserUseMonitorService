@@ -36,7 +36,6 @@ public class MyService extends Service {
 
     private SharedPreferences mPreference;
 
-
     private Handler handler;
     private Timer usage_interval_timer;
 
@@ -47,12 +46,6 @@ public class MyService extends Service {
     private int last_break_app;
 
     private String[] alternative_apps;
-                                            /*= {"com.hellochinese",
-                                               "com.nowpro.nar03_f",
-                                               "me.phrase.phrase",
-                                               "link.mikan.mikanandroid",
-                                               "com.github.client",
-                                               "com.mintflag.hatuonatoz"};//TODO UserSelect*/
     private int app_select_num;
 
     public MyService() {
@@ -99,7 +92,8 @@ public class MyService extends Service {
             Log.d(TAG, "onCreate: getStringSet(\"BREAK_APPS\") is empty");
             alternative_apps = new String[0]; //これが無いとNullPointer
         }
-        limit = mPreference.getInt("LIMIT", 38);
+        limit = mPreference.getInt("LIMIT", 35);
+        app_select_num = mPreference.getInt("BREAK_APP_COUNTER",0);
 
     }
 
@@ -193,6 +187,7 @@ public class MyService extends Service {
         editor.putStringSet("CHECK_APPS", check_package_name_set);
         //TEST
         editor.putInt("LIMIT",35);
+        editor.putInt("BREAK_APP_COUNTER", app_select_num);
         editor.commit();  //TODO commit() OR Apply() ?
 
 
